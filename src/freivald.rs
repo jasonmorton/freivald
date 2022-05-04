@@ -3,9 +3,6 @@ use ark_std::UniformRand;
 use nalgebra::DMatrix;
 
 use std::error;
-//use std::fmt;
-
-type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
 
 fn powers(x: F, n: usize) -> nalgebra::DVector<F> {
     let mut value = x;
@@ -63,20 +60,3 @@ pub fn perhapsverify(a: DMatrix<F>, b: DMatrix<F>, mc: Option<DMatrix<F>>) -> St
     }
 }
 
-// pub fn perhapsverify2(a: &DMatrix<F>, b: &DMatrix<F>, mc: &Option<DMatrix<F>>) -> String {
-//     if let Some(c) = mc {
-//         if verify(*a, *b, *c) {
-//             "Verified".to_string()
-//         } else {
-//             "Verification failed".to_string()
-//         }
-//     } else {
-//         "C not computed".to_string()
-//     }
-// }
-
-pub fn test_random() -> bool {
-    let (a, b) = generate_instance(30, 40, 20);
-    let c = a.clone() * b.clone();
-    verify(a, b, c)
-}
