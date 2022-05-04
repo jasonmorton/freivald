@@ -35,9 +35,9 @@ impl Component for Model {
         html! {
             <div>
             <button onclick={link.callback(|_| Msg::AddOne)}>{ "+1" }</button>
-		<p>{ self.value }</p>
-		<p>{freivald::test()}</p>
-		</div>
+        <p>{ self.value }</p>
+        <p>{freivald::test_random()}</p>
+        </div>
 
 
 
@@ -49,4 +49,3 @@ fn main() {
     yew::start_app::<Model>();
     // yew::start_app_with_props::<Model>(..).
 }
-
