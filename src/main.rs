@@ -5,7 +5,9 @@ use nalgebra::DMatrix;
 mod freivald;
 
 enum Msg {
-    MultiplyMatrices,
+    MultiplyMatricesLocally,
+    MultiplyMatricesServer,
+    Reset,
 }
 
 struct Model {
@@ -29,10 +31,22 @@ impl Component for Model {
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Msg::MultiplyMatrices => {
+            Msg::MultiplyMatricesLocally => {
                 //                self.a *= F::from(2u64);
                 self.c = Some(&self.a * &self.b);
                 true // rerender
+            }
+            Msg::MultiplyMatricesServer => {
+                //                self.a *= F::from(2u64);
+                self.c = Some(&self.a * &self.b);
+                true // rerender
+            }
+            Msg::Reset => {
+                let (a, b) = freivald::generate_instance(2, 3, 4);
+                self.a = a;
+                self.b = b;
+                self.c = None;
+                true
             }
         }
     }
@@ -41,7 +55,9 @@ impl Component for Model {
         let link = ctx.link();
         html! {
         <div>
-        <button onclick={link.callback(|_| Msg::MultiplyMatrices)}>{ "Compute and verify" }</button>
+        <button onclick={link.callback(|_| Msg::MultiplyMatricesLocally)}>{ "Multiply in browser and verify in browser" }</button>
+        <button onclick={link.callback(|_| Msg::MultiplyMatricesServer)}>{ "Multiply on server and verify in browser" }</button>
+        <button onclick={link.callback(|_| Msg::Reset)}>{ "Reset A and B" }</button>
         <p>{"A:"}{ &self.a }</p>
         <p>{"B:"}{ &self.b }</p>
         <p>{"C:"}{ if let Some(c) = &self.c {c.to_string()} else {"None".to_string()} }</p>
