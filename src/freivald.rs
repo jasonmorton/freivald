@@ -35,7 +35,7 @@ pub fn generate_instance(input: usize, middle: usize, output: usize) -> (DMatrix
 
 #[allow(non_snake_case)]
 /// C is the claimed product of A and B
-fn verify(A: DMatrix<F>, B: DMatrix<F>, C: DMatrix<F>) -> Result<bool> {
+fn verify(A: DMatrix<F>, B: DMatrix<F>, C: DMatrix<F>) -> bool {
     let (a_rows, a_cols) = A.shape();
     let (b_rows, b_cols) = B.shape();
     let (c_rows, c_cols) = C.shape();
@@ -48,11 +48,35 @@ fn verify(A: DMatrix<F>, B: DMatrix<F>, C: DMatrix<F>) -> Result<bool> {
     let rhs = C * x.clone();
     let lhs = A * (B * x);
 
-    Ok(rhs == lhs)
+    rhs == lhs
 }
+
+pub fn perhapsverify(a: DMatrix<F>, b: DMatrix<F>, mc: Option<DMatrix<F>>) -> String {
+    if let Some(c) = mc {
+        if verify(a, b, c) {
+            "Verified".to_string()
+        } else {
+            "Verification failed".to_string()
+        }
+    } else {
+        "C not computed".to_string()
+    }
+}
+
+// pub fn perhapsverify2(a: &DMatrix<F>, b: &DMatrix<F>, mc: &Option<DMatrix<F>>) -> String {
+//     if let Some(c) = mc {
+//         if verify(*a, *b, *c) {
+//             "Verified".to_string()
+//         } else {
+//             "Verification failed".to_string()
+//         }
+//     } else {
+//         "C not computed".to_string()
+//     }
+// }
 
 pub fn test_random() -> bool {
     let (a, b) = generate_instance(30, 40, 20);
     let c = a.clone() * b.clone();
-    verify(a, b, c).unwrap()
+    verify(a, b, c)
 }

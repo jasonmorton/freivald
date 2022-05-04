@@ -1,14 +1,17 @@
 use yew::prelude::*;
 
-use ark_bls12_381::Fr;
+use ark_bls12_381::Fr as F;
+use nalgebra::DMatrix;
 mod freivald;
 
 enum Msg {
-    AddOne,
+    MultiplyMatrices,
 }
 
 struct Model {
-    value: Fr,
+    a: DMatrix<F>,
+    b: DMatrix<F>,
+    c: Option<DMatrix<F>>,
 }
 
 impl Component for Model {
@@ -16,15 +19,19 @@ impl Component for Model {
     type Properties = ();
 
     fn create(_ctx: &Context<Self>) -> Self {
+        let (a, b) = freivald::generate_instance(2, 3, 4);
         Self {
-            value: Fr::from(1u64),
+            a: a,
+            b: b,
+            c: None,
         }
     }
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Msg::AddOne => {
-                self.value *= Fr::from(2u64);
+            Msg::MultiplyMatrices => {
+                //                self.a *= F::from(2u64);
+                self.c = Some(&self.a * &self.b);
                 true // rerender
             }
         }
@@ -33,16 +40,26 @@ impl Component for Model {
     fn view(&self, ctx: &Context<Self>) -> Html {
         let link = ctx.link();
         html! {
-            <div>
-            <button onclick={link.callback(|_| Msg::AddOne)}>{ "+1" }</button>
-        <p>{ self.value }</p>
-        <p>{freivald::test_random()}</p>
+        <div>
+        <button onclick={link.callback(|_| Msg::MultiplyMatrices)}>{ "Compute and verify" }</button>
+        <p>{"A:"}{ &self.a }</p>
+        <p>{"B:"}{ &self.b }</p>
+        <p>{"C:"}{ if let Some(c) = &self.c {c.to_string()} else {"None".to_string()} }</p>
+        <p>{freivald::perhapsverify(self.a.clone(),self.b.clone(),self.c.clone())}</p>
         </div>
 
 
 
         }
     }
+
+    fn changed(&mut self, ctx: &Context<Self>) -> bool {
+        true
+    }
+
+    fn rendered(&mut self, ctx: &Context<Self>, first_render: bool) {}
+
+    fn destroy(&mut self, ctx: &Context<Self>) {}
 }
 
 fn main() {
