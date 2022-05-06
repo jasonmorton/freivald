@@ -4,8 +4,6 @@ use ark_bls12_381::Fr as F;
 use nalgebra::DMatrix;
 mod freivald;
 
-mod fetcher;
-
 use wasm_bindgen_futures::spawn_local;
 use web_sys::console;
 
@@ -17,7 +15,7 @@ enum Msg {
     MultiplyMatricesLocally,
     MultiplyMatricesServer,
     Reset,
-    Done(u64),
+    Done(DMatrix<F>),
 }
 
 struct Model {
@@ -47,12 +45,18 @@ impl Component for Model {
             }
             Msg::MultiplyMatricesServer => {
                 // link = ctx.link() might also work with move
-                let cb = ctx.link().callback(|num: u64| Msg::Done(num));
+                let cb = ctx.link().callback(|c: DMatrix<F>| Msg::Done(c));
+                let a = self.a.clone();
+                let b = self.b.clone();
                 spawn_local(async move {
-                    let bar = my_async_fn().await;
-                    let baz = fetcher::fetch_reqwasm().await;
-                    console::log_1(&baz.into());
-                    cb.emit(9);
+                    //                    let bar = my_async_fn().await;
+                    // send over the serialized instance to the server,
+                    // wait for the response, and deserialize it
+                    //                    let baz = fetcher::fetch_reqwasm().await;
+                    let cand: DMatrix<F> = freivald::remote_mul(a, b).await;
+                    //                    console::log_1(&cand.into());
+                    // send a messsage to the component to handle the update
+                    cb.emit(cand);
                 });
 
                 //                self.c = Some(&self.a * &self.b);

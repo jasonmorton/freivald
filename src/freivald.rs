@@ -3,6 +3,7 @@ use ark_ff::BigInteger256;
 use ark_std::UniformRand;
 use nalgebra::DMatrix;
 use serde::{Deserialize, Serialize};
+use serde_json;
 use wasm_bindgen::JsValue;
 
 use reqwasm;
@@ -82,9 +83,11 @@ pub struct Solution {
 }
 
 pub async fn fetch_multiplication_u64(instance: Instance) -> Solution {
-    let req = reqwasm::http::Request::new("http://localhost:8000/mul");
-    let req = req.body(JsValue::from_serde(&instance).unwrap()); //trait `From<Instance>` is not implemented for `wasm_bindgen::JsValue`
-                                                                 // body: impl Into<JsValue>
+    let req = reqwasm::http::Request::post("http://localhost:8000/mul");
+    //    let req = req.body(JsValue::from_serde(&instance).unwrap()); // this sends "[object Object]"
+    let req = req.body(serde_json::to_string(&instance).unwrap()); // this sends "[object Object]"
+                                                                   //trait `From<Instance>` is not implemented for `wasm_bindgen::JsValue`
+                                                                   // body: impl Into<JsValue>
 
     let resp = req.send().await.unwrap();
     let s: Solution = resp.json().await.unwrap(); //T: serde::de::DeserializeOwned
