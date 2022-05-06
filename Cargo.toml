@@ -7,12 +7,13 @@ edition = "2021"
 yew = "0.19"
 ark-bls12-381 = "0.3"
 ark-std = "0.3"
+ark-ff = "0.3"
 getrandom = {version = "0.2.6", features =["js"]}
 rand = { version = "0.8", features = [ "std", "std_rng" ] } # provides ark_std::rand::thread_rng
-nalgebra = "0.31"
-reqwasm = "0.2"
+nalgebra = { version = "0.31", features =["serde-serialize"]}
+reqwasm = { version = "0.5"}
 serde = { version = "1.0", features = ["derive"] }
-wasm-bindgen = "0.2"
+wasm-bindgen = { version = "0.2", features = ["serde-serialize"]}
 wasm-bindgen-futures = "0.4"
 gloo-utils = "0.1"
 

@@ -6,15 +6,18 @@ mod freivald;
 
 mod fetcher;
 
-use web_sys::console;
 use wasm_bindgen_futures::spawn_local;
+use web_sys::console;
 
-async fn my_async_fn() -> String { String::from("Hello from pretend server")}
+async fn my_async_fn() -> String {
+    String::from("Hello from pretend server")
+}
 
 enum Msg {
     MultiplyMatricesLocally,
     MultiplyMatricesServer,
     Reset,
+    Done(u64),
 }
 
 struct Model {
@@ -39,23 +42,33 @@ impl Component for Model {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::MultiplyMatricesLocally => {
-                //                self.a *= F::from(2u64);
                 self.c = Some(&self.a * &self.b);
                 true // rerender
             }
             Msg::MultiplyMatricesServer => {
-                //                self.a *= F::from(2u64);
-		let foo = spawn_local(async {let bar = my_async_fn().await;
-					     let baz = fetcher::fetch_hello("localhost:8000");
-					     console::log_1(&bar.into())});
-                self.c = Some(&self.a * &self.b);
-                true // rerender
+                // link = ctx.link() might also work with move
+                let cb = ctx.link().callback(|num: u64| Msg::Done(num));
+                spawn_local(async move {
+                    let bar = my_async_fn().await;
+                    let baz = fetcher::fetch_reqwasm().await;
+                    console::log_1(&baz.into());
+                    cb.emit(9);
+                });
+
+                //                self.c = Some(&self.a * &self.b);
+                false // rerender
             }
             Msg::Reset => {
                 let (a, b) = freivald::generate_instance(2, 3, 4);
                 self.a = a;
                 self.b = b;
                 self.c = None;
+                true
+            }
+            Msg::Done(c) => {
+                // set self.c to c
+                self.c = Some(&self.a * &self.b);
+                console::log_1(&"Done".into());
                 true
             }
         }
