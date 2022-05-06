@@ -4,6 +4,13 @@ use ark_bls12_381::Fr as F;
 use nalgebra::DMatrix;
 mod freivald;
 
+mod fetcher;
+
+use web_sys::console;
+use wasm_bindgen_futures::spawn_local;
+
+async fn my_async_fn() -> String { String::from("Hello from pretend server")}
+
 enum Msg {
     MultiplyMatricesLocally,
     MultiplyMatricesServer,
@@ -29,7 +36,7 @@ impl Component for Model {
         }
     }
 
-    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::MultiplyMatricesLocally => {
                 //                self.a *= F::from(2u64);
@@ -38,6 +45,9 @@ impl Component for Model {
             }
             Msg::MultiplyMatricesServer => {
                 //                self.a *= F::from(2u64);
+		let foo = spawn_local(async {let bar = my_async_fn().await;
+					     let baz = fetcher::fetch_hello("localhost:8000");
+					     console::log_1(&bar.into())});
                 self.c = Some(&self.a * &self.b);
                 true // rerender
             }
